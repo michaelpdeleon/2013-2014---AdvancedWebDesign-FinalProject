@@ -1,0 +1,184 @@
+body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    background-color: #5588bb;
+}
+
+#main-container{
+    width: 1200px;
+    margin: 25px 75px;
+    position: absolute;
+}
+
+#header{
+    width: 1100px;
+    padding: 0 20px 0;
+    margin-left: 50px;
+    border: 1px solid white;
+    background-color: white;
+    border-radius: 5px;
+}
+
+#map-container{
+    width: 1100px;
+    margin-top: 20px;
+    margin-left: 50px;
+    border: 1px solid white;
+    background-color: white;
+}
+
+#tweet-container{
+    width: 540px;
+    height: 450px;
+    margin-top: 20px;
+    margin-left: 50px;
+    margin-bottom: 50px;
+    border: 1px solid white;
+    background-color: white;
+    float: left;
+    border-radius: 5px;
+}
+
+#insta-container{
+    width: 540px;
+    height: 450px;
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-bottom: 50px;
+    border: 1px solid white;
+    background-color: white;
+    float: left;
+    border-radius: 5px;
+}
+
+
+a:link {
+    color: #990000;
+}
+a:visited {
+    color: #FF0000;
+}
+a:hover {
+    color: #990000;
+    text-decoration: underline;
+}
+a:active {
+    color: #CC3300;
+}
+
+/*
+ol, ul { 
+   	list-style-type: none;
+}
+*/
+
+.modal-body {
+	overflow: auto;
+	max-height: 650px;
+	padding-left: 40px;
+}
+
+.modal-body li {
+    margin-bottom: 10px;
+}
+
+.modal-body li:last-child {
+    margin-bottom: 0;
+}
+#errors, #errorsModal {
+    color: red;
+}
+
+#googleResultsTitle {
+    font-weight: bold;
+    font-size: 1em;
+    margin-left: 40px;
+}
+
+#googlePlaceResult {
+    padding-left: 10px;
+}
+
+#googleMapCanvas {
+    margin-top: 10px;
+    /*width: 500px;
+    width: 100%;
+    height: 100%;*/
+    height: 400px;
+}
+
+.searchInputs {
+    position:absolute;
+    height: 30px;
+    width:700px;
+    margin-top: -48px;
+    margin-left:175px;
+}
+.searchInputs2{
+    position:absolute;
+    height:50px;
+    width:450px;
+    margin-top: -50;
+    margin-left:350px;
+}
+.searchButton {
+    position:absolute;
+    margin-top:-50px;
+    margin-left:810px;
+}
+
+#select_topic, #select_location, #SearchResultsRadius, #SearchType {
+    display:none;
+}
+
+#SearchResultsRadius{
+    width: 100px;
+    margin-left: -20px;
+}
+
+#twitterResults{
+    list-style-type: decimal;
+    height: 380px;
+    width: 515px;
+    overflow-x:hidden;
+    overflow-y:scroll;
+}
+
+.location{
+    color: #0000CC;
+}
+
+.author{
+    color: #990000;
+}
+
+.place{
+    color: #0000CC;
+}
+
+#instaphoto{
+    text-align: center;
+}
+
+
+#instagramResults{
+    list-style-type: none;
+}
+
+#overflow{
+    width:515px;
+    height:380px;
+    overflow-x:hidden;
+    overflow-y:scroll;
+}
+
+.modalcaption{
+    list-style-type: none;
+}
+
+.modalphoto{
+    text-align: center;
+    list-style-type: none;
+}
+

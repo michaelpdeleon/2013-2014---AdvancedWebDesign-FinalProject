@@ -1,0 +1,229 @@
+<html>
+    <head>
+        <title>Twitter Map</title>
+        <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script type="text/javascript" src="//www.google.com/jsapi"></script>
+        <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&libraries=places"></script>
+        <link href="/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <h1>Twitter Map</h1>
+              
+        
+        <div id=search-container>
+        Location: <input type="text" id="address" placeholder="ex: new brunswick, nj">
+        Type of Place: <input type="text" id="search" placeholder="ex: restaurant">
+        <button id="go">Search</button>
+        </div>
+        
+        <div id=results-container>
+        <h2>Place Results</h2>
+            <ul id="resultList">
+            </ul>
+        </div>
+        <div id="map-canvas"></div>
+                
+        <div id=tweet-container>
+        <h2>Tweets</h2>
+            <ul id="tweetList">
+            <p>Click on either a result or marker for tweets</p>
+            </ul>
+        </div>
+        
+        <script type="text/javascript">
+        
+            $(document).ready(function () {
+
+
+        var markersArray = [];
+        var geocoder = new google.maps.Geocoder();
+        var infowindow = new google.maps.InfoWindow();
+        var map = new google.maps.Map(document.getElementById('map-canvas'), {
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            center: new google.maps.LatLng(0,0),
+            zoom: 1
+        });
+
+    $("#go").click(function () {
+        for (var i = 0; i < markersArray.length; i++ ) {
+            markersArray[i].setMap(null);
+        }
+        markersArray = [];
+        $("#resultList").empty();
+        $("#tweetList").empty();
+
+        var service = new google.maps.places.PlacesService(map);
+        var address = document.getElementById('address').value;
+        
+        if ($("#address").val().length === 0){
+            alert('An Address is Required');
+        }
+        
+        geocoder.geocode( { 'address': address}, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+                var center = results[0].geometry.location
+                map.setCenter(center);
+                map.setZoom(15);
+                var request = {
+                    location: center,
+                    radius: '500',
+                    types: [$('#search').val()]
+            };
+            service.nearbySearch(request, callback);
+        } 
+    if (status !== google.maps.GeocoderStatus.OK && $("#address").val().length !== 0) {
+      alert('Zero Results for the Address');
+    }
+  });
+ });
+
+
+        function doMap(item, tweet) {
+            if (!tweet.coordinates) {
+                item.find(".location").text("(no location)");
+                return;
+            }
+                // get detailed location info from api
+            $.ajax({
+                url: '/googlemaps.php/json',
+                data: {
+                    latlng: tweet.coordinates.coordinates[1] + "," + tweet.coordinates.coordinates[0],
+                    sensor: false
+                },
+                dataType: 'json',
+                type: 'GET',
+                    success: function(mapResponse) {
+                        if (mapResponse.results.length > 0) {
+                            item.find(".location").text(mapResponse.results[0].formatted_address);
+                        } else {
+                            item.find(".location").text("(unknown location)");
+                        }
+                    },
+                    error: function() {
+                        item.find(".location").text("(error loading location)");
+                    }
+                });
+            }
+
+    function callback(results, status) {
+        if ($("#search").val().length === 0){
+            alert('Type of Place is Required');
+        }
+    
+        if ($("#search").val().length !== 0  && results.length === 0){
+            alert('Zero Results for Type of Place');
+        }
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            for (var i = 0; i < results.length; i++) {
+            var place = results[i];
+            $("#resultList").append("<li id='list" + [i] + "'> <a href='#'>" + place.name + "</a></li>")
+            var list = $("#list" + [i]);   
+            clickresult(list,place);
+            createMarker(results[i]);
+    
+        }
+    }
+}
+
+    function clickresult(list,place) {
+        list.click(function(){
+        $("#tweetList").empty();
+       
+        $.ajax({
+            data: {
+                q: place.name,
+                count: 5,
+                lang: 'en',
+                },
+                url: '/twitter.php/search/tweets.json',
+                type: 'GET',
+                dataType: 'json',
+            success: function (serverResponse) {
+                var itemlist = [];
+                for (var i = 0; i < serverResponse.statuses.length; i++) {
+                    var tweet = serverResponse.statuses[i];
+                    var item = $("#template>.tweetmap").clone();
+                    item.appendTo("#tweetList");
+                    item.find(".author").text(tweet.user.screen_name);
+                    item.find(".text").text(tweet.text);
+                                // get location info from google
+                    doMap(item, tweet);
+                }
+             
+                if (serverResponse.statuses.length === 0){
+                    $("#tweetList").text("No recent tweets about place");
+                    }
+                },
+             
+            error: function(){
+                $("#tweetList").text("Error Loading Tweets");
+                }
+            });
+    
+    
+  });
+}
+        
+        
+
+    function createMarker(place) {
+        var placeLoc = place.geometry.location;
+        var marker = new google.maps.Marker({
+        map: map,
+        position: placeLoc
+    });
+        markersArray.push(marker);
+        markerclick(marker, place);
+        
+}
+
+function markerclick(marker, place){
+        google.maps.event.addListener(marker, 'click', function() {
+        infowindow.setContent(place.name);
+        infowindow.open(map, this);
+        $("#tweetList").empty();
+    
+        $.ajax({
+            data: {
+                q: place.name,
+                count: 5,
+                lang: 'en',
+                },
+                url: '/twitter.php/search/tweets.json',
+                type: 'GET',
+                dataType: 'json',
+            success: function (serverResponse) {
+                var itemlist = [];
+                for (var i = 0; i < serverResponse.statuses.length; i++) {
+                    var tweet = serverResponse.statuses[i];
+                    var item = $("#template>.tweetmap").clone();
+                    item.appendTo("#tweetList");
+                    item.find(".author").text(tweet.user.screen_name);
+                    item.find(".text").text(tweet.text);
+                                // get location info from google
+                    doMap(item, tweet);
+                }
+             
+                if (serverResponse.statuses.length === 0){
+                    $("#tweetList").text("No recent tweets about place");
+                    }
+                },
+             
+            error: function(){
+                $("#tweetList").text("Error Loading Tweets");
+                }
+            });
+    
+    
+  });
+}
+
+
+    });
+
+        </script>
+        <div id="template" style="display: none">
+            <li class="tweetmap"><span class="location"></span> </br><span class="author"></span> --- <span class="text"></span></li>
+        </div>
+    </body>
+</html>
